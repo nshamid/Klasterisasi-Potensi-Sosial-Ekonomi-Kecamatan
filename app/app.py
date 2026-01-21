@@ -55,8 +55,16 @@ except Exception as e:
     st.stop()
 
 # --- 3. PROSES KLASTERING ---
-X = df_raw[fitur_ekonomi]
+X = df_raw[fitur_ekonomi].copy()
+
+# Penyesuaian Skala (Sesuai dengan tahap di Notebook)
+X['Jumlah Penduduk'] = (X['Jumlah Penduduk'] * 1000).astype(int)
+X['Kepadatan Penduduk'] = (X['Kepadatan Penduduk'] * 1000).astype(int)
+
+# Lakukan Transformasi dengan Scaler yang sudah di-load
 X_scaled = scaler.transform(X)
+
+# Prediksi Klaster
 df_raw['Cluster'] = kmeans.predict(X_scaled)
 
 # Mapping
