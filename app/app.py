@@ -6,29 +6,173 @@ import joblib
 from sklearn.decomposition import PCA
 
 # --- 1. KONFIGURASI HALAMAN ---
-st.set_page_config(page_title="Dashboard Sosial-Ekonomi Palembang 2025", layout="wide")
+st.set_page_config(page_title="Dashboard Sosial-Ekonomi Palembang 2025", layout="wide", page_icon="🏙️")
 
-# CSS
+# --- CSS CUSTOM: DESIGN SYSTEM ---
 st.markdown("""
     <style>
-    /* Mengubah warna latar belakang utama */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+    :root {
+        --primary: #fe6e00;
+        --primary-dark: #e05f00;
+        --primary-soft: #fff1e6;
+        --bg: #fcfaf7;
+        --surface: #f3f4f6;
+        --text: #423d38;
+        --text-soft: #7a746c;
+        --border: #e7e2da;
+        --tinggi: #2f9e44;
+        --menengah: #3b6ea5;
+        --rendah: #d64545;
+    }
+
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+
     .stApp {
-        background-color: #FFFFFF;
+        background-color: var(--bg);
     }
-    /* Mengubah semua teks menjadi hitam */
-    h1, h2, h3, h4, h5, h6, p, li, div, span {
-        color: #000000 !important;
+
+    /* Semua teks pakai warna on-background, kecuali elemen yang sengaja diberi warna lain */
+    h1, h2, h3, h4, h5, h6, p, li, label, .stMarkdown, span {
+        color: var(--text) !important;
     }
-    /* Mengubah warna teks di Sidebar */
+
+    h1, h2, h3 {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+    }
+
+    /* Judul utama dengan aksen garis oranye */
+    h1 {
+        border-left: 6px solid var(--primary);
+        padding-left: 16px;
+        margin-bottom: 0.3em !important;
+    }
+
+    h3, h4 {
+        color: var(--primary-dark) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Divider */
+    hr {
+        border: none;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--border) 100%);
+        border-radius: 4px;
+        margin: 1.2em 0 !important;
+    }
+
+    /* --- SIDEBAR --- */
     [data-testid="stSidebar"] {
-        background-color: #F8F9FA;
+        background-color: var(--surface);
+        border-right: 1px solid var(--border);
     }
     [data-testid="stSidebar"] * {
-        color: #000000 !important;
+        color: var(--text) !important;
     }
-    /* Mengubah warna border tabel agar terlihat jelas */
+    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] .stTitle {
+        color: var(--primary-dark) !important;
+    }
+
+    /* Radio button navigasi jadi kartu */
+    [data-testid="stSidebar"] [role="radiogroup"] label {
+        background-color: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+    [data-testid="stSidebar"] [role="radiogroup"] label:hover {
+        border-color: var(--primary);
+        background-color: var(--primary-soft);
+    }
+    [data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    [data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] p {
+        color: #ffffff !important;
+        font-weight: 600;
+    }
+    [data-testid="stSidebar"] [role="radiogroup"] input:checked + div {
+        background-color: var(--primary) !important;
+        border-color: var(--primary) !important;
+    }
+
+    /* --- METRIC CARDS --- */
+    [data-testid="stMetric"] {
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-left: 5px solid var(--primary);
+        border-radius: 12px;
+        padding: 16px 18px;
+        box-shadow: 0 2px 6px rgba(66, 61, 56, 0.06);
+    }
+    [data-testid="stMetricValue"] {
+        color: var(--primary-dark) !important;
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 700 !important;
+    }
+    [data-testid="stMetricLabel"] {
+        color: var(--text-soft) !important;
+        font-weight: 500 !important;
+    }
+
+    /* --- TABEL / DATAFRAME --- */
     .stDataFrame {
-        border: 1px solid #000000;
+        border: 1px solid var(--border) !important;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(66, 61, 56, 0.05);
+    }
+
+    /* --- ALERT BOXES (info / success) --- */
+    div[data-testid="stAlert"] {
+        border-radius: 10px;
+        border: 1px solid var(--border);
+    }
+    div[data-baseweb="notification"] {
+        background-color: var(--primary-soft) !important;
+        border-left: 5px solid var(--primary) !important;
+    }
+    div[data-testid="stAlertContentSuccess"] {
+        color: var(--text) !important;
+    }
+
+    /* --- SELECTBOX --- */
+    [data-baseweb="select"] > div {
+        border-color: var(--border) !important;
+        border-radius: 8px !important;
+    }
+    [data-baseweb="select"] > div:hover {
+        border-color: var(--primary) !important;
+    }
+
+    /* --- GAMBAR (logo, banner) --- */
+    [data-testid="stImage"] img {
+        border-radius: 12px;
+    }
+
+    /* --- LINK --- */
+    a {
+        color: var(--primary-dark) !important;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    a:hover {
+        color: var(--primary) !important;
+        text-decoration: underline;
+    }
+
+    /* --- KOLOM SEBAGAI CARD (opsional look) --- */
+    [data-testid="column"] > div > div[data-testid="stVerticalBlock"] {
+        gap: 0.4rem;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -39,6 +183,13 @@ fitur_ekonomi = [
     'Sarana Kesehatan', 'Transportasi', 'Sarana Perdagangan dan Jasa', 
     'Keberadaan Pasar dan Pertokoan', 'Bank dan Koperasi', 'IKM dan Sentra'
 ]
+
+# Palet warna kategori (konsisten dengan design system)
+COLOR_MAP = {
+    'Potensi Tinggi': '#2f9e44',
+    'Potensi Menengah': '#3b6ea5',
+    'Potensi Rendah': '#d64545'
+}
 
 # --- 2. LOAD DATA & MODEL ---
 @st.cache_resource
@@ -158,24 +309,33 @@ elif menu == "📊 Analisis Klasterisasi":
         df_pca['Kecamatan'] = df_raw['Kecamatan']
         df_pca['Kategori'] = df_raw['Kategori']
 
-        # PERBAIKAN WARNA: Rendah=Merah (#c0392b), Menengah=Biru (#2980b9)
         fig_pca = px.scatter(
             df_pca, x='PC1', y='PC2', color='Kategori',
             hover_name='Kecamatan', text='Kecamatan',
-            color_discrete_map={'Potensi Tinggi': '#27ae60', 'Potensi Menengah': '#2980b9', 'Potensi Rendah': '#c0392b'},
+            color_discrete_map=COLOR_MAP,
             template="plotly_white"
         )
         fig_pca.update_traces(textposition='top center', marker=dict(size=12, line=dict(width=1, color='DarkSlateGrey')))
+        fig_pca.update_layout(
+            plot_bgcolor='#fcfaf7', paper_bgcolor='#fcfaf7',
+            font=dict(color='#423d38'),
+            legend=dict(bgcolor='#f3f4f6', bordercolor='#e7e2da', borderwidth=1)
+        )
         st.plotly_chart(fig_pca, use_container_width=True)
 
     with col2:
         st.write("#### 🥧 Proporsi Kategori")
         count_data = df_raw['Kategori'].value_counts().reset_index()
-        # PERBAIKAN WARNA: Harus sama dengan PCA
         fig_pie = px.pie(
             count_data, names='Kategori', values='count',
             color='Kategori',
-            color_discrete_map={'Potensi Tinggi': '#27ae60', 'Potensi Menengah': '#2980b9', 'Potensi Rendah': '#c0392b'}
+            color_discrete_map=COLOR_MAP,
+            hole=0.4
+        )
+        fig_pie.update_layout(
+            plot_bgcolor='#fcfaf7', paper_bgcolor='#fcfaf7',
+            font=dict(color='#423d38'),
+            legend=dict(bgcolor='#f3f4f6', bordercolor='#e7e2da', borderwidth=1)
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
@@ -184,14 +344,20 @@ elif menu == "📊 Analisis Klasterisasi":
     # Baris 2: Daftar Kecamatan & Profiling
     st.write("### 📋 Pembagian Wilayah per Kategori")
     
-    # PERBAIKAN URUTAN LIST: Menengah harus di tengah agar warna Biru cocok
     cat_cols = st.columns(3)
     kategori_list = ['Potensi Tinggi', 'Potensi Menengah', 'Potensi Rendah']
-    warna_list = ['green', 'blue', 'red']
 
     for i, kat in enumerate(kategori_list):
         with cat_cols[i]:
-            st.markdown(f"#### :{warna_list[i]}[{kat}]")
+            warna = COLOR_MAP[kat]
+            st.markdown(
+                f"""
+                <div style="background-color:{warna}18; border-left:5px solid {warna};
+                            border-radius:10px; padding:10px 14px; margin-bottom:10px;">
+                    <span style="color:{warna}; font-weight:700; font-family:'Poppins',sans-serif;">{kat}</span>
+                </div>
+                """, unsafe_allow_html=True
+            )
             list_kecamatan = df_raw[df_raw['Kategori'] == kat]['Kecamatan'].values
             if len(list_kecamatan) > 0:
                 for kec in list_kecamatan:
@@ -210,7 +376,12 @@ elif menu == "📊 Analisis Klasterisasi":
         df_avg, x='Kategori', y=feature, color='Kategori',
         text_auto='.2f',
         title=f"Rata-rata {feature} per Kategori",
-        color_discrete_map={'Potensi Tinggi': '#27ae60', 'Potensi Menengah': '#2980b9', 'Potensi Rendah': '#c0392b'}
+        color_discrete_map=COLOR_MAP
+    )
+    fig_bar.update_layout(
+        plot_bgcolor='#fcfaf7', paper_bgcolor='#fcfaf7',
+        font=dict(color='#423d38'),
+        title_font=dict(color='#423d38', family='Poppins')
     )
     st.plotly_chart(fig_bar, use_container_width=True)
 
