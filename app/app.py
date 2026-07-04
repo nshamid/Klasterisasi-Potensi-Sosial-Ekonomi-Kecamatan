@@ -35,7 +35,6 @@ st.markdown("""
         background-color: var(--bg);
     }
 
-    /* Semua teks pakai warna on-background, kecuali elemen yang sengaja diberi warna lain */
     h1, h2, h3, h4, h5, h6, p, li, label, .stMarkdown, span {
         color: var(--text) !important;
     }
@@ -45,11 +44,12 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* Judul utama dengan aksen garis oranye */
-    h1 {
+    /* Judul utama (konten) pakai aksen garis tebal */
+    section[data-testid="stMain"] h1 {
         border-left: 6px solid var(--primary);
-        padding-left: 16px;
+        padding-left: 18px;
         margin-bottom: 0.3em !important;
+        margin-left: 4px;
     }
 
     h3, h4 {
@@ -57,7 +57,6 @@ st.markdown("""
         font-weight: 600 !important;
     }
 
-    /* Divider */
     hr {
         border: none;
         height: 3px;
@@ -74,15 +73,24 @@ st.markdown("""
     [data-testid="stSidebar"] * {
         color: var(--text) !important;
     }
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] .stTitle {
+
+    /* Judul "Navigasi" pakai aksen lebih tipis & renggang, beda dari judul utama */
+    [data-testid="stSidebarUserContent"] h1 {
+        border-left: 4px solid var(--primary);
+        padding-left: 12px;
+        margin-left: 2px;
+        margin-top: 0.6em !important;
+        margin-bottom: 0.6em !important;
+        font-size: 1.5rem !important;
         color: var(--primary-dark) !important;
     }
 
-    /* Radio button navigasi jadi kartu */
+    /* Radio button navigasi: indikator garis kiri, bukan kotak penuh */
     [data-testid="stSidebar"] [role="radiogroup"] label {
         background-color: #ffffff;
         border: 1px solid var(--border);
-        border-radius: 10px;
+        border-left: 4px solid transparent;
+        border-radius: 8px;
         padding: 10px 14px;
         margin-bottom: 8px;
         transition: all 0.2s ease;
@@ -92,17 +100,16 @@ st.markdown("""
         border-color: var(--primary);
         background-color: var(--primary-soft);
     }
-    [data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] {
-        background-color: var(--primary);
-        border-color: var(--primary);
+    [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {
+        background-color: var(--primary-soft);
+        border-left: 4px solid var(--primary);
+        border-top-color: var(--border);
+        border-right-color: var(--border);
+        border-bottom-color: var(--border);
     }
-    [data-testid="stSidebar"] [role="radiogroup"] label[data-checked="true"] p {
-        color: #ffffff !important;
+    [data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) p {
+        color: var(--primary-dark) !important;
         font-weight: 600;
-    }
-    [data-testid="stSidebar"] [role="radiogroup"] input:checked + div {
-        background-color: var(--primary) !important;
-        border-color: var(--primary) !important;
     }
 
     /* --- METRIC CARDS --- */
@@ -118,6 +125,10 @@ st.markdown("""
         color: var(--primary-dark) !important;
         font-family: 'Poppins', sans-serif !important;
         font-weight: 700 !important;
+        font-size: 1.5rem !important;
+        white-space: normal !important;
+        overflow-wrap: break-word;
+        line-height: 1.3 !important;
     }
     [data-testid="stMetricLabel"] {
         color: var(--text-soft) !important;
@@ -170,7 +181,6 @@ st.markdown("""
         text-decoration: underline;
     }
 
-    /* --- KOLOM SEBAGAI CARD (opsional look) --- */
     [data-testid="column"] > div > div[data-testid="stVerticalBlock"] {
         gap: 0.4rem;
     }
@@ -208,17 +218,13 @@ except Exception as e:
 # --- 3. PROSES KLASTERING ---
 X = df_raw[fitur_ekonomi].copy()
 
-# Penyesuaian Skala (Sesuai dengan tahap di Notebook)
 X['Jumlah Penduduk'] = (X['Jumlah Penduduk'] * 1000).astype(int)
 X['Kepadatan Penduduk'] = (X['Kepadatan Penduduk'] * 1000).astype(int)
 
-# Lakukan Transformasi dengan Scaler yang sudah di-load
 X_scaled = scaler.transform(X)
 
-# Prediksi Klaster
 df_raw['Cluster'] = kmeans.predict(X_scaled)
 
-# Mapping
 ranking = df_raw.groupby('Cluster')[fitur_ekonomi].mean(numeric_only=True).sum(axis=1).sort_values().index
 mapping = {ranking[0]: 'Potensi Rendah', ranking[1]: 'Potensi Tinggi', ranking[2]: 'Potensi Menengah'}
 df_raw['Kategori'] = df_raw['Cluster'].map(mapping)
@@ -236,7 +242,6 @@ if menu == "🏠 Beranda & Dataset":
     st.title("🏙️ Potensi Sosial-Ekonomi Kecamatan di Kota Palembang 2025")
     st.markdown("---")
     
-    # Bagian 1: Informasi Project & Sumber Data
     col_a, col_b = st.columns([2, 1])
     with col_a:
         st.subheader("📌 Informasi Project")
@@ -259,7 +264,6 @@ if menu == "🏠 Beranda & Dataset":
 
     st.divider()
 
-    # Bagian 2: Fitur (Atribut) Dataset 
     st.subheader("📋 Fitur (Atribut) Dataset")
     st.markdown("""
     | Fitur | Keterangan |
@@ -278,11 +282,9 @@ if menu == "🏠 Beranda & Dataset":
 
     st.divider()
     
-    # Bagian 3: Preview Dataset
     st.write("### 📄 Dataset Utama")
     st.dataframe(df_raw[['Kecamatan'] + fitur_ekonomi], use_container_width=True)
 
-    # Bagian 4: Akses Project
     st.write("---")
     st.write("### 🔗 Akses Project & Dokumentasi")
     
@@ -298,7 +300,6 @@ elif menu == "📊 Analisis Klasterisasi":
     st.title("📊 Hasil Analisis Klasterisasi")
     st.markdown("---")
 
-    # Baris 1: Visualisasi PCA dan Distribusi
     col1, col2 = st.columns([2, 1])
     
     with col1:
@@ -341,7 +342,6 @@ elif menu == "📊 Analisis Klasterisasi":
 
     st.divider()
 
-    # Baris 2: Daftar Kecamatan & Profiling
     st.write("### 📋 Pembagian Wilayah per Kategori")
     
     cat_cols = st.columns(3)
@@ -367,7 +367,6 @@ elif menu == "📊 Analisis Klasterisasi":
 
     st.divider()
 
-    # Baris 3: Karakteristik Per Klaster
     st.write("### 📈 Karakteristik Indikator Per Kategori")
     feature = st.selectbox("Pilih Indikator untuk Melihat Perbandingan:", fitur_ekonomi)
     
@@ -390,25 +389,21 @@ elif menu == "👥 Profil Kelompok":
     st.title("👥 Profil Kelompok Kerja Praktik")
     st.markdown("---")
 
-    # 1. Banner Dokumentasi
     st.image("Images/banner_kelompok.jpg", 
              caption="Dokumentasi Bersama Bapak Edi Subeno, S.E., M.Si. Kepala BPS Kota Palembang", 
              use_container_width=True)
     
     st.divider()
 
-    # 2. Logo UNSRI
     col_l1, col_l2, col_l3 = st.columns([1, 1, 1])
     with col_l2:
         st.image("Images/logo_unsri.png", width=200)
     
-    # 3. Informasi Universitas (Teks Tengah)
     st.markdown("<h2 style='text-align: center;'>Teknik Informatika Bilingual 2023</h2>", unsafe_allow_html=True)
     st.markdown("<h3 style='text-align: center;'>Fakultas Ilmu Komputer, Universitas Sriwijaya</h3>", unsafe_allow_html=True)
     
     st.divider()
 
-    # 4. Informasi Akademik & Anggota
     col_info, col_anggota = st.columns(2)
 
     with col_info:
